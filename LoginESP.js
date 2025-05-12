@@ -7,8 +7,6 @@ const STATE = urlParams.get("state");
 const CLIENT_ID = urlParams.get("client_id");
 const NONCE = urlParams.get("nonce");
 
-console.log("[OIDC] NONCE:", NONCE);
-
 if (!CLIENT_ID || !REDIRECT_URI || !STATE || !NONCE) {
   document.body.innerHTML = "<h1 class='text-red-600 text-center mt-10'>Недостаточно параметров в URL запроса</h1>";
   throw new Error("OIDC параметры отсутствуют");
@@ -45,19 +43,22 @@ async function loginWithPassword() {
     const resp = await fetch(BACKEND_PASS_URL, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ username, password, client_id: CLIENT_ID }),
+      redirect: "manual", // важно
+      body: JSON.stringify({
+        username,
+        password,
+        client_id: CLIENT_ID,
+        redirect_uri: REDIRECT_URI,
+        state: STATE
+      }),
     });
 
-    const data = await resp.json();
-
-    if (resp.ok) {
-      const redirectUrl = new URL(REDIRECT_URI);
-      redirectUrl.searchParams.set("access_token", data.access_token);
-      redirectUrl.searchParams.set("id_token", data.id_token);
-      redirectUrl.searchParams.set("state", STATE);
-      window.location.href = redirectUrl.toString();
+    const location = resp.headers.get("Location");
+    if (resp.status === 302 && location) {
+      window.location.href = location;
     } else {
-      setStatus(data.error || "Ошибка входа", true);
+      const data = await resp.json();
+      setStatus(data.error || data.detail || "Ошибка входа", true);
     }
   } catch (err) {
     setStatus("Сетевая ошибка: " + err.message, true);
@@ -97,19 +98,22 @@ async function loginWithEcp() {
     const resp = await fetch(BACKEND_ECP_URL, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ signed_data: signed, nonce: NONCE, client_id: CLIENT_ID }),
+      redirect: "manual", // важно
+      body: JSON.stringify({
+        signed_data: signed,
+        nonce: NONCE,
+        client_id: CLIENT_ID,
+        redirect_uri: REDIRECT_URI,
+        state: STATE
+      }),
     });
 
-    const data = await resp.json();
-
-    if (resp.ok) {
-      const redirectUrl = new URL(REDIRECT_URI);
-      redirectUrl.searchParams.set("access_token", data.access_token);
-      redirectUrl.searchParams.set("id_token", data.id_token);
-      redirectUrl.searchParams.set("state", STATE);
-      window.location.href = redirectUrl.toString();
+    const location = resp.headers.get("Location");
+    if (resp.status === 302 && location) {
+      window.location.href = location;
     } else {
-      setStatus(data.error || data.message || "Ошибка входа через ЭЦП", true);
+      const data = await resp.json();
+      setStatus(data.error || data.detail || "Ошибка входа через ЭЦП", true);
     }
   } catch (err) {
     setStatus("Ошибка подписи: " + err.message, true);
