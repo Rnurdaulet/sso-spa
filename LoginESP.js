@@ -7,6 +7,8 @@ const STATE = urlParams.get("state");
 const CLIENT_ID = urlParams.get("client_id");
 const NONCE = urlParams.get("nonce");
 
+console.log("[OIDC] Параметры:", { REDIRECT_URI, STATE, CLIENT_ID, NONCE });
+
 if (!CLIENT_ID || !REDIRECT_URI || !STATE || !NONCE) {
   document.body.innerHTML = "<h1 class='text-red-600 text-center mt-10'>Недостаточно параметров в URL запроса</h1>";
   throw new Error("OIDC параметры отсутствуют");
@@ -43,24 +45,29 @@ async function loginWithPassword() {
     const resp = await fetch(BACKEND_PASS_URL, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      redirect: "manual", // важно
+      redirect: "manual",
       body: JSON.stringify({
         username,
         password,
         client_id: CLIENT_ID,
         redirect_uri: REDIRECT_URI,
-        state: STATE
+        state: STATE,
       }),
     });
 
     const location = resp.headers.get("Location");
     if (resp.status === 302 && location) {
+      console.log("[OIDC] Редирект по логину:", location);
       window.location.href = location;
     } else {
-      const data = await resp.json();
+      let data = {};
+      try {
+        data = await resp.json();
+      } catch (_) {}
       setStatus(data.error || data.detail || "Ошибка входа", true);
     }
   } catch (err) {
+    console.error("Ошибка логина:", err);
     setStatus("Сетевая ошибка: " + err.message, true);
   }
 }
@@ -73,6 +80,7 @@ async function loginWithEcp() {
   try {
     await client.connect();
   } catch (err) {
+    console.error("Ошибка подключения к NCALayer:", err);
     return setStatus("Ошибка подключения: " + err.message, true);
   }
 
@@ -98,24 +106,29 @@ async function loginWithEcp() {
     const resp = await fetch(BACKEND_ECP_URL, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      redirect: "manual", // важно
+      redirect: "manual",
       body: JSON.stringify({
         signed_data: signed,
         nonce: NONCE,
         client_id: CLIENT_ID,
         redirect_uri: REDIRECT_URI,
-        state: STATE
+        state: STATE,
       }),
     });
 
     const location = resp.headers.get("Location");
     if (resp.status === 302 && location) {
+      console.log("[OIDC] Редирект по ЭЦП:", location);
       window.location.href = location;
     } else {
-      const data = await resp.json();
+      let data = {};
+      try {
+        data = await resp.json();
+      } catch (_) {}
       setStatus(data.error || data.detail || "Ошибка входа через ЭЦП", true);
     }
   } catch (err) {
+    console.error("Ошибка подписи:", err);
     setStatus("Ошибка подписи: " + err.message, true);
   }
 }
