@@ -79,14 +79,14 @@ async function loginWithEcp() {
       NCALayerClient.basicsSignerSignAny
     );
     console.log(signed);
-    if (signed.includes("-----BEGIN CMS-----")) {
-      signed = signed
-          .replace("-----BEGIN CMS-----", "")
-          .replace("-----END CMS-----", "")
-          .replace(/\r?\n|\r/g, "")
-          .trim();
-  }
-  console.log(signed);
+  //   if (signed.includes("-----BEGIN CMS-----")) {
+  //     signed = signed
+  //         .replace("-----BEGIN CMS-----", "")
+  //         .replace("-----END CMS-----", "")
+  //         .replace(/\r?\n|\r/g, "")
+  //         .trim();
+  // }
+  // console.log(signed);
 
 
     const resp = await fetch(BACKEND_ECP_URL, {
