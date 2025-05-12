@@ -1,6 +1,6 @@
 // LoginESP.js
 const BACKEND_PASS_URL = "https://sso-entry.odx.kz/api/login/password";
-const BACKEND_ECP_URL = "https://sso-entry.odx.kz//api/login/ecp";
+const BACKEND_ECP_URL = "https://sso-entry.odx.kz/api/login/ecp";
 
 const urlParams = new URLSearchParams(window.location.search);
 const REDIRECT_URI = urlParams.get("redirect_uri");
