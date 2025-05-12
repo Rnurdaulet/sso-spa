@@ -78,7 +78,7 @@ async function loginWithEcp() {
       NCALayerClient.basicsCMSParamsAttached,
       NCALayerClient.basicsSignerSignAny
     );
-
+    console.log(signed);
     if (signed.includes("-----BEGIN CMS-----")) {
       signed = signed
           .replace("-----BEGIN CMS-----", "")
@@ -86,6 +86,7 @@ async function loginWithEcp() {
           .replace(/\r?\n|\r/g, "")
           .trim();
   }
+  console.log(signed);
 
 
     const resp = await fetch(BACKEND_ECP_URL, {
