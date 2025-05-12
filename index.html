@@ -1,45 +1,102 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="ru" class="dark">
 <head>
   <meta charset="UTF-8" />
-  <title>SSO Proxy Login</title>
+  <title>Вход — SSO Proxy</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            primary: {
+              light: '#6366f1', // indigo-500
+              dark: '#4f46e5', // indigo-600
+            },
+            accent: {
+              light: '#10b981', // emerald-500
+              dark: '#059669', // emerald-600
+            }
+          }
+        }
+      }
+    };
+  </script>
   <script src="ncalayer-client.js"></script>
   <script defer src="LoginESP.js"></script>
 </head>
-<body class="bg-gray-100 min-h-screen flex items-center justify-center">
-  <div class="bg-white shadow-lg rounded-xl p-8 w-full max-w-lg space-y-8">
-    <h1 class="text-2xl font-bold text-center text-gray-800">Вход в систему</h1>
+<body class="bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 transition-colors duration-300">
+  <div class="absolute top-4 right-4">
+    <button id="themeToggle"
+      class="text-sm px-4 py-2 rounded border border-slate-300 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800">
+       Тема
+    </button>
+  </div>
 
-    <!-- Вход по паролю -->
-    <div>
-      <h2 class="text-xl font-semibold text-gray-700 mb-4">Вход по логину и паролю</h2>
-      <div class="space-y-3">
-        <input type="text" id="username" placeholder="ИИН / Логин"
-               class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400">
-        <input type="password" id="password" placeholder="Пароль"
-               class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400">
-        <button id="loginPasswordBtn"
-                class="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-lg font-semibold">
-          Войти
-        </button>
+  <div class="min-h-screen flex items-center justify-center px-4 sm:px-6 lg:px-8">
+    <div class="max-w-md w-full space-y-10">
+      <div>
+        <h2 class="text-center text-3xl font-extrabold">Вход в систему</h2>
+        <p class="mt-2 text-center text-sm text-slate-500 dark:text-slate-400">
+          Используйте <span class="font-medium text-primary-light dark:text-primary-dark">логин/пароль</span> или <span class="font-medium text-accent-light dark:text-accent-dark">вход через ЭЦП</span>
+        </p>
       </div>
-    </div>
 
-    <!-- Вход через ЭЦП -->
-    <div>
-      <h2 class="text-xl font-semibold text-gray-700 mb-4">Вход через ЭЦП</h2>
-      <div class="space-y-3">
-        <input type="text" id="groupid" placeholder="ИИН или ключевая строка"
-               class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400">
+      <!-- Пароль -->
+      <div class="bg-slate-50 dark:bg-slate-800 py-8 px-6 shadow rounded-lg sm:px-10">
+        <h3 class="text-lg font-semibold mb-4">Логин и пароль</h3>
+        <div class="space-y-4">
+          <div>
+            <label for="username" class="block text-sm font-medium">ИИН / Логин</label>
+            <input id="username" name="username" type="text" autocomplete="username"
+              class="mt-1 block w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-primary-light focus:border-primary-light dark:bg-slate-700 dark:border-slate-600">
+          </div>
+          <div>
+            <label for="password" class="block text-sm font-medium">Пароль</label>
+            <input id="password" name="password" type="password" autocomplete="current-password"
+              class="mt-1 block w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-primary-light focus:border-primary-light dark:bg-slate-700 dark:border-slate-600">
+          </div>
+          <div>
+            <button id="loginPasswordBtn"
+              class="w-full bg-primary-light dark:bg-primary-dark hover:bg-indigo-600 dark:hover:bg-indigo-700 text-white py-2 px-4 rounded-md font-medium">
+              Войти
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ЭЦП -->
+      <div class="bg-slate-50 dark:bg-slate-800 py-8 px-6 shadow rounded-lg sm:px-10">
+        <h3 class="text-lg font-semibold mb-4">Вход через ЭЦП</h3>
         <button id="loginEcpBtn"
-                class="w-full bg-green-600 hover:bg-green-700 text-white py-2 px-4 rounded-lg font-semibold">
+          class="w-full bg-accent-light dark:bg-accent-dark hover:bg-emerald-600 dark:hover:bg-emerald-700 text-white py-2 px-4 rounded-md font-medium">
           Подписать и войти
         </button>
       </div>
-    </div>
 
-    <div id="status" class="text-center text-sm text-gray-700 font-medium pt-4"></div>
+      <!-- Статус -->
+      <div id="status" class="text-center text-sm font-medium pt-2"></div>
+    </div>
   </div>
+
+  <script>
+    // Темная тема
+    const toggleBtn = document.getElementById('themeToggle');
+    const htmlEl = document.documentElement;
+    const theme = localStorage.getItem("theme");
+
+    if (theme === "dark") {
+      htmlEl.classList.add("dark");
+    } else {
+      htmlEl.classList.remove("dark");
+    }
+
+    toggleBtn.addEventListener("click", () => {
+      htmlEl.classList.toggle("dark");
+      localStorage.setItem("theme", htmlEl.classList.contains("dark") ? "dark" : "light");
+    });
+  </script>
 </body>
 </html>
